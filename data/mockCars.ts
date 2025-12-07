@@ -1,0 +1,48 @@
+import { Car } from '../types/car';
+
+export const mockCars: Car[] = [
+    {
+        id: '1',
+        reference: 'Réf : 0312665',
+        model: 'Hyundai i20',
+        image: 'https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=400&h=300&fit=crop',
+        garage: 'Garage Rahim',
+        location: 'Casablanca',
+        daysPosted: 20,
+        status: 'Publiée',
+        price: '185.000 DH',
+    },
+    {
+        id: '2',
+        reference: 'Réf : 0312665',
+        model: 'Dacia Sandero',
+        image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&h=300&fit=crop',
+        garage: 'Oredic',
+        location: 'Casablanca',
+        daysPosted: 20,
+        status: 'Publiée',
+        price: '185.000 DH',
+    },
+    {
+        id: '3',
+        reference: 'Réf : 0312665',
+        model: 'Kia Picanto',
+        image: 'https://images.unsplash.com/photo-1583267746897-c5e0d8c6a6e5?w=400&h=300&fit=crop',
+        garage: 'Yassine Bentaleb',
+        location: 'Fes',
+        daysPosted: 20,
+        status: 'Expertise',
+        price: '185.000 DH',
+    },
+    {
+        id: '4',
+        reference: 'Réf : 0312665',
+        model: 'Porsche Cayman 2',
+        image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=300&fit=crop',
+        garage: 'Driss Moutaouir',
+        location: 'Casablanca',
+        daysPosted: 20,
+        status: 'Expertise',
+        price: '185.000 DH',
+    },
+];

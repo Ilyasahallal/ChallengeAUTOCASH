@@ -1,13 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
 
-export default function AccueilScreen() {
+export default function LeadsScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
-                <Text style={styles.title}>Accueil</Text>
-                <Text style={styles.subtitle}>Page d'accueil en cours de développement</Text>
+                <Ionicons name="people-outline" size={64} color={Colors.primary} />
+                <Text style={styles.title}>Leads</Text>
+                <Text style={styles.subtitle}>Gérez vos prospects et contacts ici</Text>
             </View>
         </SafeAreaView>
     );
@@ -28,6 +30,7 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: '700',
         color: Colors.gray900,
+        marginTop: 16,
         marginBottom: 8,
     },
     subtitle: {
