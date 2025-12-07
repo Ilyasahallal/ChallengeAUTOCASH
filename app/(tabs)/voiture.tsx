@@ -27,17 +27,18 @@ export default function VoitureScreen() {
                             placeholder="Rechercher une voiture"
                         />
                     </View>
+                    <View style={styles.headerIcons}>
+                        <TouchableOpacity style={styles.iconButton}>
+                            <Ionicons name="notifications-outline" size={24} color={Colors.gray700} />
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.iconButton}>
+                            <Ionicons name="menu-outline" size={24} color={Colors.gray700} />
+                        </TouchableOpacity>
+                    </View>
                     <FilterButton onPress={() => console.log('Filter pressed')} />
                 </View>
 
-                <View style={styles.headerIcons}>
-                    <TouchableOpacity style={styles.iconButton}>
-                        <Ionicons name="notifications-outline" size={24} color={Colors.gray700} />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.iconButton}>
-                        <Ionicons name="menu-outline" size={24} color={Colors.gray700} />
-                    </TouchableOpacity>
-                </View>
+
             </View>
 
             {/* Tab Switcher */}
@@ -81,7 +82,8 @@ const styles = StyleSheet.create({
     },
     header: {
         paddingHorizontal: 16,
-        paddingTop: 8,
+        marginTop: 20,
+        paddingTop: 20,
         paddingBottom: 12,
         backgroundColor: Colors.gray50,
     },
