@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -8,34 +8,123 @@ import {
     TouchableOpacity,
     SafeAreaView,
     StatusBar,
+    ActivityIndicator,
+    Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Colors } from '../constants/Colors';
+import { vehicleService } from '../services/vehicleService';
+import Dropdown from '../components/Dropdown';
+import { VEHICLE_OPTIONS } from '../constants/VehicleOptions';
 
 export default function AddVehicleScreen() {
     const router = useRouter();
 
+    // Reference Data State
+    const [referenceData, setReferenceData] = useState<any>(null);
+    const [isLoadingData, setIsLoadingData] = useState(true);
+
     // Form state
-    const [prix, setPrix] = useState('330 000');
+    const [prix, setPrix] = useState('');
     const [typeVendeur, setTypeVendeur] = useState('Professionnel');
     const [nomVendeur, setNomVendeur] = useState('');
     const [objectifs, setObjectifs] = useState('');
-    const [tel, setTel] = useState('+212 5849 39 48');
-    const [email, setEmail] = useState('contact@autoclic.ma');
-    const [ville, setVille] = useState('Casablanca');
-    const [adresse, setAdresse] = useState('BD 2e Mars N°1');
+    const [tel, setTel] = useState('');
+    const [email, setEmail] = useState('');
+    const [ville, setVille] = useState('');
+    const [adresse, setAdresse] = useState('');
     const [marque, setMarque] = useState('Audi');
     const [modele, setModele] = useState('A5');
-    const [premiereCirculation, setPremiereCirculation] = useState('2022');
-    const [miseEnCirculation, setMiseEnCirculation] = useState('DK');
-    const [kilometrage, setKilometrage] = useState('100 000');
-    const [carburant, setCarburant] = useState('Casablanca');
+    const [premiereCirculation, setPremiereCirculation] = useState('2024');
+    const [miseEnCirculation, setMiseEnCirculation] = useState('MA');
+    const [kilometrage, setKilometrage] = useState('');
+    const [carburant, setCarburant] = useState('Diesel');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = () => {
-        console.log('Form submitted');
-        // Handle form submission
-        router.back();
+    useEffect(() => {
+        loadReferenceData();
+    }, []);
+
+    const loadReferenceData = async () => {
+        try {
+            const data = await vehicleService.getReferenceData();
+            setReferenceData(data);
+
+            // Set default values if data exists
+            if (data?.marques?.values?.length > 0) setMarque(data.marques.values[0]);
+            if (data?.villes?.values?.length > 0) setVille(data.villes.values[0]);
+            if (data?.carburants?.values?.length > 0) setCarburant(data.carburants.values[0]);
+
+        } catch (error) {
+            console.error('Error loading reference data:', error);
+            Alert.alert('Erreur', 'Impossible de charger les données de référence.');
+        } finally {
+            setIsLoadingData(false);
+        }
+    };
+
+    // Helper to get dropdown options from reference data
+    const getOptions = (type: string, fallback: any[]) => {
+        if (referenceData && referenceData[type] && referenceData[type].values) {
+            return referenceData[type].values.map((v: string) => ({ label: v, value: v }));
+        }
+        return fallback;
+    };
+
+    // Helper for dependent options (Models based on Brand)
+    const getModelOptions = () => {
+        if (referenceData && referenceData.marques && referenceData.marques.dependentValues && referenceData.marques.dependentValues[marque]) {
+            return referenceData.marques.dependentValues[marque].map((m: string) => ({ label: m, value: m }));
+        }
+        return VEHICLE_OPTIONS.modeles;
+    };
+
+    const handleSubmit = async () => {
+        try {
+            setIsSubmitting(true);
+
+            // Create vehicle data
+            const vehicleData = {
+                prix,
+                typeVendeur,
+                nomVendeur,
+                objectifs,
+                tel,
+                email,
+                ville,
+                adresse,
+                marque,
+                modele,
+                premiereCirculation,
+                miseEnCirculation,
+                kilometrage,
+                carburant,
+            };
+
+            // Submit to API
+            await vehicleService.createVehicle(vehicleData);
+
+            // Show success message
+            Alert.alert(
+                'Succès',
+                'Le véhicule a été ajouté avec succès !',
+                [
+                    {
+                        text: 'OK',
+                        onPress: () => router.back(),
+                    },
+                ]
+            );
+        } catch (error: any) {
+            Alert.alert(
+                'Erreur',
+                error.message || 'Une erreur est survenue lors de l\'ajout du véhicule',
+                [{ text: 'OK' }]
+            );
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -86,13 +175,16 @@ export default function AddVehicleScreen() {
                 </View>
 
                 {/* Type vendeur */}
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Type vendeur</Text>
-                    <TouchableOpacity style={styles.dropdown}>
-                        <Text style={styles.dropdownText}>{typeVendeur}</Text>
-                        <Ionicons name="chevron-down" size={20} color={Colors.gray600} />
-                    </TouchableOpacity>
-                </View>
+                {isLoadingData ? (
+                    <ActivityIndicator size="small" color={Colors.primary} style={styles.loader} />
+                ) : (
+                    <Dropdown
+                        label="Type vendeur"
+                        value={typeVendeur}
+                        options={getOptions('typeVendeur', VEHICLE_OPTIONS.typeVendeur)}
+                        onSelect={setTypeVendeur}
+                    />
+                )}
 
                 {/* Nom du vendeur */}
                 <View style={styles.inputGroup}>
@@ -144,15 +236,13 @@ export default function AddVehicleScreen() {
                 </View>
 
                 {/* Ville */}
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Ville</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={ville}
-                        onChangeText={setVille}
-                        placeholderTextColor={Colors.gray400}
-                    />
-                </View>
+                <Dropdown
+                    label="Ville"
+                    value={ville}
+                    options={getOptions('villes', VEHICLE_OPTIONS.villes)}
+                    onSelect={setVille}
+                    placeholder="Sélectionner une ville"
+                />
 
                 {/* Adresse */}
                 <View style={styles.inputGroup}>
@@ -172,40 +262,42 @@ export default function AddVehicleScreen() {
                 </View>
 
                 {/* Marque */}
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Marque</Text>
-                    <TouchableOpacity style={styles.dropdown}>
-                        <Text style={styles.dropdownText}>{marque}</Text>
-                        <Ionicons name="chevron-down" size={20} color={Colors.gray600} />
-                    </TouchableOpacity>
-                </View>
+                <Dropdown
+                    label="Marque"
+                    value={marque}
+                    options={getOptions('marques', VEHICLE_OPTIONS.marques)}
+                    onSelect={(val) => {
+                        setMarque(val);
+                        // Reset model when brand changes
+                        setModele('');
+                    }}
+                    placeholder="Sélectionner une marque"
+                />
 
                 {/* Modèle */}
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Modèle</Text>
-                    <TouchableOpacity style={styles.dropdown}>
-                        <Text style={styles.dropdownText}>{modele}</Text>
-                        <Ionicons name="chevron-down" size={20} color={Colors.gray600} />
-                    </TouchableOpacity>
-                </View>
+                <Dropdown
+                    label="Modèle"
+                    value={modele}
+                    options={getModelOptions()}
+                    onSelect={setModele}
+                    placeholder="Sélectionner un modèle"
+                />
 
                 {/* 1ère mise en circulation */}
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>1ère mise en circulation</Text>
-                    <TouchableOpacity style={styles.dropdown}>
-                        <Text style={styles.dropdownText}>{premiereCirculation}</Text>
-                        <Ionicons name="chevron-down" size={20} color={Colors.gray600} />
-                    </TouchableOpacity>
-                </View>
+                <Dropdown
+                    label="1ère mise en circulation"
+                    value={premiereCirculation}
+                    options={VEHICLE_OPTIONS.annees} // Years are generated, keep as is
+                    onSelect={setPremiereCirculation}
+                />
 
-                {/* Mise en circulation */}
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Mise en circulation</Text>
-                    <TouchableOpacity style={styles.dropdown}>
-                        <Text style={styles.dropdownText}>{miseEnCirculation}</Text>
-                        <Ionicons name="chevron-down" size={20} color={Colors.gray600} />
-                    </TouchableOpacity>
-                </View>
+                {/* Mise en circulation (Origine) */}
+                <Dropdown
+                    label="Origine / Dédouanement"
+                    value={miseEnCirculation}
+                    options={getOptions('origines', VEHICLE_OPTIONS.origines)}
+                    onSelect={setMiseEnCirculation}
+                />
 
                 {/* Kilométrage */}
                 <View style={styles.inputGroup}>
@@ -223,14 +315,14 @@ export default function AddVehicleScreen() {
                     </View>
                 </View>
 
-                {/* Ville (Carburant) */}
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Ville</Text>
-                    <TouchableOpacity style={styles.dropdown}>
-                        <Text style={styles.dropdownText}>{carburant}</Text>
-                        <Ionicons name="chevron-down" size={20} color={Colors.gray600} />
-                    </TouchableOpacity>
-                </View>
+                {/* Carburant */}
+                <Dropdown
+                    label="Carburant"
+                    value={carburant}
+                    options={getOptions('carburants', VEHICLE_OPTIONS.carburant)}
+                    onSelect={setCarburant}
+                    placeholder="Sélectionner le carburant"
+                />
 
                 {/* Photo voiture */}
                 <View style={styles.inputGroup}>
@@ -242,8 +334,16 @@ export default function AddVehicleScreen() {
                 </View>
 
                 {/* Submit Button */}
-                <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                    <Text style={styles.submitButtonText}>Continuer</Text>
+                <TouchableOpacity
+                    style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
+                    onPress={handleSubmit}
+                    disabled={isSubmitting}
+                >
+                    {isSubmitting ? (
+                        <ActivityIndicator color={Colors.white} />
+                    ) : (
+                        <Text style={styles.submitButtonText}>Continuer</Text>
+                    )}
                 </TouchableOpacity>
 
                 {/* Bottom spacing */}
@@ -390,6 +490,9 @@ const styles = StyleSheet.create({
         color: Colors.primary,
         fontWeight: '500',
     },
+    loader: {
+        marginVertical: 10,
+    },
     submitButton: {
         backgroundColor: Colors.primary,
         borderRadius: 12,
@@ -401,6 +504,12 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 8,
         elevation: 4,
+    },
+    submitButtonDisabled: {
+        opacity: 0.7,
+        backgroundColor: Colors.gray400,
+        shadowOpacity: 0,
+        elevation: 0,
     },
     submitButtonText: {
         fontSize: 16,
