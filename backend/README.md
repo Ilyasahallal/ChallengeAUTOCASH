@@ -17,13 +17,17 @@ Backend API REST pour l'application de gestion de véhicules ChallengeAUTOCASH.
 backend/
 ├── src/main/java/com/autocash/
 │   ├── controller/
-│   │   └── VehicleController.java    # Endpoints REST
+│   │   ├── VehicleController.java     # Endpoints REST
+│   │   └── ReferenceDataController.java # Endpoints ReferenceData
 │   ├── model/
-│   │   └── Vehicle.java               # Entité MongoDB
+│   │   ├── Vehicle.java               # Entité MongoDB
+│   │   └── ReferenceData.java         # Entité ReferenceData
 │   ├── repository/
-│   │   └── VehicleRepository.java     # Interface MongoDB
+│   │   ├── VehicleRepository.java     # Interface MongoDB
+│   │   └── ReferenceDataRepository.java # Interface ReferenceData
 │   ├── service/
-│   │   └── VehicleService.java        # Logique métier
+│   │   ├── VehicleService.java        # Logique métier
+│   │   └── ReferenceDataService.java  # Logique ReferenceData
 │   └── dto/
 │       └── (DTOs à venir)
 └── src/main/resources/
