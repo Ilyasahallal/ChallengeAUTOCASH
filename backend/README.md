@@ -173,6 +173,8 @@ L'API sera disponible sur `http://localhost:8080`
 | GET | `/api/vehicles/search?q={term}` | Rechercher |
 | GET | `/api/vehicles/filter/price?min=X&max=Y` | Filtrer par prix |
 | GET | `/api/vehicles/filter/kilometrage?max=X` | Filtrer par km |
+| GET | `/api/reference-data` | Liste toutes les données de référence |
+| GET | `/api/reference-data/{type}` | Données de référence par type |
 
 Voir [API Documentation](../api-documentation.md) pour plus de détails.
 
@@ -235,6 +237,19 @@ curl http://localhost:8080/api/vehicles/search?q=Audi
   "createdAt": "datetime",
   "updatedAt": "datetime",
   "userId": "string"
+}
+```
+
+### ReferenceData
+
+```java
+{
+  "id": "string",
+  "type": "string", // e.g., "marques", "villes", "carburants"
+  "values": [ "string" ],
+  "dependentValues": {
+    "key": [ "value" ] // e.g., for models dependent on brands
+  }
 }
 ```
 
