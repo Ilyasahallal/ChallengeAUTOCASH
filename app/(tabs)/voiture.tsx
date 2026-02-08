@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/Colors';
 import SearchBar from '../../components/SearchBar';
 import FilterButton from '../../components/FilterButton';
@@ -10,6 +11,7 @@ import FloatingActionButton from '../../components/FloatingActionButton';
 import { mockCars } from '../../data/mockCars';
 
 export default function VoitureScreen() {
+    const router = useRouter();
     const [activeTab, setActiveTab] = useState<'all' | 'mine'>('all');
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -70,7 +72,7 @@ export default function VoitureScreen() {
             />
 
             {/* Floating Action Button */}
-            <FloatingActionButton onPress={() => console.log('Add car pressed')} />
+            <FloatingActionButton onPress={() => router.push('/add-vehicle')} />
         </SafeAreaView>
     );
 }
